@@ -17,6 +17,10 @@ let foobar = 838383;
 
 	program := p.ParseProgram()
 	if program == nil {
+		t.Fatalf("ParseProgram() return nil")
+	}
+
+	if len(program.Statements) != 3 {
 		t.Fatalf("program.Statements does not contain 3 statements. got=%d",
 			len(program.Statements))
 	}
