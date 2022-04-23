@@ -161,7 +161,7 @@ if (10 > 1) {
 	}
 }
 
-func TestErrorHandline(t *testing.T) {
+func TestErrorHandling(t *testing.T) {
 	tests := []struct {
 		input           string
 		expectedMessage string
@@ -173,6 +173,10 @@ func TestErrorHandline(t *testing.T) {
 		{
 			"5 + true; 5;",
 			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			`"Hello" - "World"`,
+			"unknown operator: STRING - STRING",
 		},
 		{
 			"-true",
@@ -279,6 +283,20 @@ addTwo(2);`
 
 func TestStringLiteral(t *testing.T) {
 	input := `"Hello World!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "World!"`
 
 	evaluated := testEval(input)
 	str, ok := evaluated.(*object.String)
