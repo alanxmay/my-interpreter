@@ -1,29 +1,44 @@
 package repl
 
 import (
-	"bufio"
-	"fmt"
 	"io"
 	"my-interpreter/evaluator"
 	"my-interpreter/lexer"
 	"my-interpreter/object"
 	"my-interpreter/parser"
+
+	"github.com/chzyer/readline"
 )
 
 const PROMPT = ">>> "
 
 func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+	l, err := readline.NewEx(&readline.Config{
+		Prompt:          "\033[34m»\033[0m ",
+		HistoryFile:     "/tmp/my_interpreter_readline.tmp",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+
+	if err != nil {
+		panic(err)
+	}
+	defer l.Close()
+
 	env := object.NewEnvironment()
 
 	for {
-		fmt.Print(PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
+		line, err := l.Readline()
+		if err == readline.ErrInterrupt {
+			if len(line) == 0 {
+				return
+			} else {
+				continue
+			}
+		} else if err == io.EOF {
 			return
 		}
 
-		line := scanner.Text()
 		l := lexer.New(line)
 		p := parser.New(l)
 
